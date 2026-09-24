@@ -2,7 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from telethon import TelegramClient, events
-from msgdb import init_db, save_message, get_message, update_message
+from msgdb import init_db, save_message, get_message, update_message, get_message_data
 
 load_dotenv()
 
@@ -58,7 +58,6 @@ async def edited_message(event):
         f"Old: \n {old_text}\n"
         f"New: \n {new_text}\n"
         )
-    
 
 
     update_message(event.chat_id, event.message.id, new_text)
@@ -66,10 +65,15 @@ async def edited_message(event):
 @client.on(events.MessageDeleted)
 async def deleted_message(event):
     for message_id in event.deleted_ids:
+        message_data = get_message_data(event.chat_id, message_id)
+        if message_data is None:
+            continue
+        sender_username, sender_name, old_text = message_data
         old_text = get_message(event.chat_id, message_id)
         if old_text is None:
             continue
         send_to_bot(f"Сообщение удалено: \n"
+            f"Отправитель: {sender_name} {f'(@{sender_username})' if sender_username else ''}\n"
             f"Old: \n {old_text}\n"
             )
         update_message(event.chat_id, message_id, "[deleted]")
