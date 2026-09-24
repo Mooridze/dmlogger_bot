@@ -6,8 +6,8 @@ from msgdb import init_db, save_message, get_message, update_message
 
 load_dotenv()
 
-api_id = int(os.getenv("API_ID"))
-api_hash = os.getenv("API_HASH")
+api_id = int(os.getenv("BOT_API"))
+api_hash = os.getenv("BOT_HASH")
 bot_token = os.getenv("BOT_TOKEN")
 
 BOT_CHAT_ID = 8251759731
@@ -53,8 +53,6 @@ async def edited_message(event):
         return
     if old_text == new_text:
         return
-    if event.sender_id == 8251759731:
-        return
     send_to_bot(f"Сообщение отредактировано: \n"
         f"Отправитель: {sender_name}, {f'(@{username})' if username else ''}\n"
         f"Old: \n {old_text}\n"
@@ -64,6 +62,17 @@ async def edited_message(event):
 
 
     update_message(event.chat_id, event.message.id, new_text)
+
+@client.on(events.MessageDeleted)
+async def deleted_message(event):
+    for message_id in event.deleted_ids:
+        old_text = get_message(event.chat_id, message_id)
+        if old_text is None:
+            continue
+        send_to_bot(f"Сообщение удалено: \n"
+            f"Old: \n {old_text}\n"
+            )
+        update_message(event.chat_id, message_id, "[deleted]")
 
 
 
