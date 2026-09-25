@@ -15,7 +15,7 @@ client = TelegramClient('user', api_id, api_hash)
 
 def send_to_bot(message):
     requests.post(f"https://api.telegram.org/bot{bot_token}/sendMessage", data={"chat_id": BOT_CHAT_ID, "text": message})
-send_to_bot("Бот запущен!")
+# send_to_bot("Бот запущен!")
 
 @client.on(events.NewMessage)
 async def new_message(event):
@@ -74,15 +74,12 @@ async def deleted_message(event):
             continue
         send_to_bot(f"Сообщение удалено: \n"
             f"Отправитель: {sender_name} {f'(@{sender_username})' if sender_username else ''}\n"
-            f"Old: \n {old_text}\n"
-            )
+            f"{old_text}")
         update_message(event.chat_id, message_id, "[deleted]")
 
 
 
 init_db()
-
-print("Бот запущен. Ожидание новых сообщений...")
 
 
 client.start()
